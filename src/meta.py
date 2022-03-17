@@ -13,9 +13,9 @@ class TestCase:
     def __init__(self) -> None:
         self.name: str
         self.timeout: int = 0
-        self.run: typing.Callable[..., None] = lambda: None
-        self.setup: typing.Callable[..., None] = lambda: None
-        self.cleanup: typing.Callable[..., None] = lambda: None
+        self.run: typing.Callable[..., None] = lambda x: None
+        self.setup: typing.Callable[..., None] = lambda x: None
+        self.cleanup: typing.Callable[..., None] = lambda x: None
 
 
 class TestRun:

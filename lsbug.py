@@ -5,9 +5,7 @@
 
 import argparse
 
-import src.meta as meta
-import src.data as data
-import src.utils as utils
+from src import meta, data, utils
 
 
 def main() -> None:
@@ -29,17 +27,18 @@ def main() -> None:
         watchdog.register(test_run)
 
     test_list = utils.merge_ranges(args.exclude, args.test_cases)
+    test_run.run()
     for test_num in test_list:
         # We will need Python 3.8+ here.
         if not (test_case := data.num2case(test_num)):
             continue
 
-        watchdog = meta.Watchdog()
-        watchdog.register(test_case)
-        test_case.setup()
-        test_case.run()
-        test_case.cleanup()
-        watchdog.unregister(test_case)
+        tc_watchdog = meta.Watchdog()
+        tc_watchdog.register(test_case)
+        test_case.setup(tc_watchdog)
+        test_case.run(tc_watchdog)
+        test_case.cleanup(tc_watchdog)
+        tc_watchdog.unregister(test_case)
 
     if args.timeout:
         watchdog.unregister(test_run)

@@ -9,8 +9,5 @@ import src.meta as meta
 def num2case(num: int) -> meta.TestCase:
     # FIXME
     test_case = meta.TestCase()
-    test_case.run = lambda: print('run')
-    test_case.setup = lambda: print('setup')
-    test_case.cleanup = lambda: print('cleanup')
 
     return test_case
