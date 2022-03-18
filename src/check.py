@@ -72,12 +72,3 @@ def test_meta_watchdog():
 
     assert os.WIFSIGNALED(status) and os.WTERMSIG(status) == signal.SIGTERM
 
-
-def main() -> None:
-    test_lsbug_help()
-    test_lsbug_negative()
-    test_meta_watchdog()
-
-
-if __name__ == '__main__':
-    main()
