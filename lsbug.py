@@ -33,12 +33,14 @@ def main() -> None:
         if not (test_case := data.num2case(test_num)):
             continue
 
+        print(f'- Start test case: {test_case.name}.')
         tc_watchdog = meta.Watchdog()
         tc_watchdog.register(test_case)
         test_case.setup(tc_watchdog)
         test_case.run(tc_watchdog)
         test_case.cleanup(tc_watchdog)
         tc_watchdog.unregister(test_case)
+        print(f'- Finish test case: {test_case.name}')
 
     if args.timeout:
         watchdog.unregister(test_run)

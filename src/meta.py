@@ -11,7 +11,7 @@ import threading
 
 class TestCase:
     def __init__(self) -> None:
-        self.name: str
+        self.name: str = ''
         self.timeout: int = 0
         self.run: typing.Callable[..., None] = lambda x: None
         self.setup: typing.Callable[..., None] = lambda x: None
@@ -27,7 +27,8 @@ class TestRun:
 
 class Watchdog:
     def __init__(self) -> None:
-        self.pids: set[int] = set()
+        # We will need to kill children first, so we will use a stack.
+        self.pids: list[int] = [os.getpid()]
         self.timers: dict[typing.Union[TestRun, TestCase], threading.Timer] = {}
 
     def kill(self) -> None:
@@ -49,7 +50,7 @@ class Watchdog:
         del self.timers[target]
 
     def add_pid(self, pid: int) -> None:
-        self.pids.add(pid)
+        self.pids.append(pid)
 
     def del_pid(self, pid: int) -> None:
         self.pids.remove(pid)

@@ -10,6 +10,7 @@ import sys
 import time
 
 import meta
+import utils
 
 
 class Lsbug:
@@ -17,7 +18,6 @@ class Lsbug:
 
 
 def test_lsbug_help() -> None:
-    print('- Test lsbug help.')
     # We want to run the tests from any directory, so use the absolute path.
     output = subprocess.check_output([Lsbug.path, '-h']).decode('utf-8')
     expect = """\
@@ -47,28 +47,33 @@ optional arguments:
 
 
 def test_lsbug_negative():
-    print('- Test lsbug with a negative test case number.')
     output = subprocess.check_output([Lsbug.path, '-1']).decode('utf-8')
     print(output, end='')
     assert output == ''
 
 
 def test_meta_watchdog():
-    print('- Test the Watchdog class.')
-    tc = meta.TestCase()
-    tc.timeout = 10
+    tc_pid = os.fork()
+    if tc_pid == 0:
+        tc = meta.TestCase()
+        tc.timeout = 10
 
-    wd = meta.Watchdog()
-    wd.register(tc)
+        wd = meta.Watchdog()
+        wd.register(tc)
 
-    pid = os.fork()
-    if pid == 0:
-        time.sleep(15)
+        pid = os.fork()
+        if pid == 0:
+            time.sleep(15)
+            sys.exit(os.EX_OK)
+
+        wd.add_pid(pid)
+        os.waitpid(pid, 0)
+        wd.unregister(tc)
         sys.exit(os.EX_OK)
 
-    wd.add_pid(pid)
-    _, status = os.wait()
-    wd.unregister(tc)
-
+    _, status = os.waitpid(tc_pid, 0)
     assert os.WIFSIGNALED(status) and os.WTERMSIG(status) == signal.SIGTERM
 
+
+def test_utils_tail_cpu():
+    assert utils.tail_cpu() >= 0
