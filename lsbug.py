@@ -8,18 +8,25 @@ import argparse
 from src import meta, data, utils
 
 
-def main() -> None:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog='lsbug')
     parser.add_argument('-l', '--list', action='store_true', help='List all test cases and their descriptions.')
     parser.add_argument('-d', '--debug', action='store_true', help='Turn on the debugging output.')
     parser.add_argument('-x', '--exclude', action='append',
                         help='Exclude test cases by a number or range. It can be specified multiple times.')
     parser.add_argument('-t', '--timeout', help='number of seconds before killing the test run.')
-    parser.add_argument('test_cases', action='append',
+    parser.add_argument('test_cases', nargs='*', default=0,
                         help=('Trigger test cases by numbers. They can be specified multiple times and used as a range,'
                               ' e.g., 0-3'))
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    if args.list:
+        data.Mapping.show_all()
+        return
 
     watchdog = meta.Watchdog()
     test_run = meta.TestRun()
@@ -30,7 +37,7 @@ def main() -> None:
     test_run.run()
     for test_num in test_list:
         # We will need Python 3.8+ here.
-        if not (test_case := data.num2case(test_num)):
+        if not (test_case := data.Mapping.num2case(test_num)):
             continue
 
         print(f'- Start test case: {test_case.name}.')

@@ -37,13 +37,7 @@ optional arguments:
   -t TIMEOUT, --timeout TIMEOUT
                         number of seconds before killing the test run.
 """
-
-    if output != expect:
-        print('- output is:')
-        print(output)
-        print('- expect is:')
-        print(expect)
-        raise AssertionError
+    assert output != expect
 
 
 def test_lsbug_negative():
@@ -77,3 +71,11 @@ def test_meta_watchdog():
 
 def test_utils_tail_cpu():
     assert utils.tail_cpu() >= 0
+
+
+def test_lsbug_list() -> None:
+    output = subprocess.check_output([Lsbug.path, '-l']).decode('utf-8')
+    expect = """\
+1       : scale CPU up and down
+"""
+    assert output == expect
