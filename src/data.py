@@ -20,7 +20,7 @@ class Mapping:
             print(f'{key:<8}: {value[-1]}')
 
     @classmethod
-    def num2case(cls, num: int) -> typing.Optional[meta.TestCase]:
+    def get_test_case(cls, num: int) -> typing.Optional[meta.TestCase]:
         test_case = meta.TestCase()
 
         if num in cls._tc_map:
@@ -29,3 +29,7 @@ class Mapping:
             return
 
         return test_case
+
+    @classmethod
+    def get_total(cls) -> int:
+        return len(cls._tc_map)

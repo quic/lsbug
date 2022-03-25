@@ -5,13 +5,45 @@
 
 import os
 import re
+import typing
+
+import src.data as data
 
 
-def merge_ranges(exclude_list: list[str], test_list: list[str]) -> list[int]:
-    # FIXME
-    ret = [int(test_list[0])]
+def parse_range(simple_range: str) -> tuple[int, int]:
+    try:
+        start, end = simple_range.split('-')
+    except ValueError:
+        raise RuntimeError(f'Unable to parse the range {simple_range}.')
 
-    return ret
+    return int(start), int(end)
+
+
+def merge_ranges(exclude_list: typing.Optional[list[str]], test_list: typing.Optional[list[str]]) -> list[int]:
+    flat_list = []
+    # We will run all tests if none is given.
+    if not test_list:
+        flat_list = range(1, data.Mapping.get_total() + 1)
+
+    flat_set = set(flat_list)
+    for item in test_list:
+        if item.lstrip('-').isdigit():
+            flat_set.add(int(item))
+        else:
+            start, end = parse_range(item)
+            flat_set.update(range(start, end + 1))
+
+    if not exclude_list:
+        exclude_list = []
+
+    for item in exclude_list:
+        if item.lstrip('-').isdigit():
+            flat_set.remove(int(item))
+        else:
+            start, end = parse_range(item)
+            flat_set.difference_update(range(start, end + 1))
+
+    return sorted(flat_set)
 
 
 def tail_cpu() -> int:

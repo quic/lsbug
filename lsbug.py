@@ -37,7 +37,7 @@ def main() -> None:
     test_run.run()
     for test_num in test_list:
         # We will need Python 3.8+ here.
-        if not (test_case := data.Mapping.num2case(test_num)):
+        if not (test_case := data.Mapping.get_test_case(test_num)):
             continue
 
         print(f'- Start test case: {test_case.name}.')

@@ -9,12 +9,12 @@ import subprocess
 import sys
 import time
 
-import meta
-import utils
+import src.meta as meta
+import src.utils as utils
 
 
 class Lsbug:
-    path = f'{sys.path[0]}/../lsbug.py'
+    path = f'{sys.path[0]}/lsbug.py'
 
 
 def test_lsbug_help() -> None:
@@ -79,3 +79,15 @@ def test_lsbug_list() -> None:
 1       : scale CPU up and down
 """
     assert output == expect
+
+
+def test_parse_range() -> None:
+    assert utils.parse_range('1-3') == (1, 3)
+    assert utils.parse_range('0-9') == (0, 9)
+
+
+def test_merge_range() -> None:
+    assert utils.merge_ranges(['2-5'], ['1-9']) == [1, 6, 7, 8, 9]
+    assert utils.merge_ranges(['1-8'], ['2-4']) == []
+    assert utils.merge_ranges(['2', '4'], ['1-6']) == [1, 3, 5, 6]
+    assert utils.merge_ranges(['1-4'], ['2', '7', '8']) == [7, 8]
