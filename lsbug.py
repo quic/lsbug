@@ -33,7 +33,15 @@ def main() -> None:
     if args.timeout:
         watchdog.register(test_run)
 
-    test_list = utils.merge_ranges(args.exclude, args.test_cases)
+    tc_allow = []
+    if args.test_cases:
+        tc_allow = args.test_cases
+
+    tc_deny = []
+    if args.exclude:
+        tc_deny = args.exclude
+
+    test_list = utils.merge_ranges(deny=tc_deny, allow=tc_allow)
     test_run.run()
     for test_num in test_list:
         # We will need Python 3.8+ here.

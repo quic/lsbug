@@ -5,7 +5,6 @@
 
 import os
 import re
-import typing
 
 import src.data as data
 
@@ -19,24 +18,21 @@ def parse_range(simple_range: str) -> tuple[int, int]:
     return int(start), int(end)
 
 
-def merge_ranges(exclude_list: typing.Optional[list[str]], test_list: typing.Optional[list[str]]) -> list[int]:
+def merge_ranges(deny: list[str], allow: list[str]) -> list[int]:
     flat_list = []
     # We will run all tests if none is given.
-    if not test_list:
+    if not allow:
         flat_list = range(1, data.Mapping.get_total() + 1)
 
     flat_set = set(flat_list)
-    for item in test_list:
+    for item in allow:
         if item.lstrip('-').isdigit():
             flat_set.add(int(item))
         else:
             start, end = parse_range(item)
             flat_set.update(range(start, end + 1))
 
-    if not exclude_list:
-        exclude_list = []
-
-    for item in exclude_list:
+    for item in deny:
         if item.lstrip('-').isdigit():
             flat_set.remove(int(item))
         else:

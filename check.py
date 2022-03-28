@@ -88,7 +88,7 @@ def test_parse_range() -> None:
 
 
 def test_merge_range() -> None:
-    assert utils.merge_ranges(['2-5'], ['1-9']) == [1, 6, 7, 8, 9]
-    assert utils.merge_ranges(['1-8'], ['2-4']) == []
-    assert utils.merge_ranges(['2', '4'], ['1-6']) == [1, 3, 5, 6]
-    assert utils.merge_ranges(['1-4'], ['2', '7', '8']) == [7, 8]
+    assert utils.merge_ranges(deny=['2-5'], allow=['1-9']) == [1, 6, 7, 8, 9]
+    assert utils.merge_ranges(deny=['1-8'], allow=['2-4']) == []
+    assert utils.merge_ranges(deny=['2', '4'], allow=['1-6']) == [1, 3, 5, 6]
+    assert utils.merge_ranges(deny=['1-4'], allow=['2', '7', '8']) == [7, 8]
