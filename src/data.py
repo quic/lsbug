@@ -7,11 +7,13 @@ import typing
 
 import src.meta as meta
 import src.cppc as cppc
+import src.pcie as pcie
 
 
 class Mapping:
     _tc_map = {
-        1: (cppc.setup_cppc, cppc.run_cppc, meta.TestCase().cleanup, 30, 'scale CPU up and down')
+        1: (cppc.setup_cppc, cppc.run_cppc, meta.TestCase().cleanup, 30, 'Scale CPU up and down.'),
+        2: (pcie.check_pcie_sysfs, pcie.read_pcie_sysfs, meta.TestCase().cleanup, 30, 'Read all PCIe sysfs files.')
     }
 
     @classmethod

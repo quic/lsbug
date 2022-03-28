@@ -76,7 +76,8 @@ def test_utils_tail_cpu():
 def test_lsbug_list() -> None:
     output = subprocess.check_output([Lsbug.path, '-l']).decode('utf-8')
     expect = """\
-1       : scale CPU up and down
+1       : Scale CPU up and down.
+2       : Read all PCIe sysfs files.
 """
     assert output == expect
 
