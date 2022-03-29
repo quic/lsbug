@@ -16,5 +16,5 @@ To run the actual arm64 tests:
 $ <path>/lsbug.py
 ```
 
-# License
+## License
 The code is licensed under GPL-2.0+.
