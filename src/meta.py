@@ -5,22 +5,31 @@ import os
 import signal
 import typing
 import threading
+import abc
 
 
 class TestCase:
     def __init__(self) -> None:
         self.name: str = ''
         self.timeout: int = 0
-        self.run: typing.Callable[..., None] = lambda x: None
-        self.setup: typing.Callable[..., None] = lambda x: None
-        self.cleanup: typing.Callable[..., None] = lambda x: None
+
+    @abc.abstractmethod
+    def setup(self, watchdog=...) -> None:
+        pass
+
+    @abc.abstractmethod
+    def run(self, watchdog=...) -> None:
+        pass
+
+    @abc.abstractmethod
+    def cleanup(self, watchdog=...) -> None:
+        pass
 
 
 class TestRun:
     def __init__(self) -> None:
         self.name: str
         self.timeout: int = 0
-        self.run: typing.Callable[..., None] = lambda: None
 
 
 class Watchdog:

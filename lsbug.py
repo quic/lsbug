@@ -33,22 +33,16 @@ def main() -> None:
     if args.timeout:
         watchdog.register(test_run)
 
-    tc_allow = []
-    if args.test_cases:
-        tc_allow = args.test_cases
-
-    tc_deny = []
-    if args.exclude:
-        tc_deny = args.exclude
+    tc_allow = list(args.test_cases or [])
+    tc_deny = list(args.exclude or [])
 
     test_list = utils.merge_ranges(deny=tc_deny, allow=tc_allow)
-    test_run.run()
     for test_num in test_list:
         # We will need Python 3.8+ here.
         if not (test_case := data.Mapping.get_test_case(test_num)):
             continue
 
-        print(f'- Start test case: {test_case.name}.')
+        print(f'- Start test case: {test_case.name}')
         tc_watchdog = meta.Watchdog()
         tc_watchdog.register(test_case)
         test_case.setup(tc_watchdog)
