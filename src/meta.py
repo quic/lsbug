@@ -39,6 +39,8 @@ class Watchdog:
         assert(target not in self.timers)
 
         timer = threading.Timer(target.timeout, self.kill)
+        # We want the timer to end if the main thread is terminated.
+        timer.daemon = True
         timer.start()
         self.timers[target] = timer
 

@@ -3,10 +3,11 @@
 # Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import concurrent.futures
 import re
 import os
 import errno
+import multiprocessing
+import sys
 
 import src.meta as meta
 
@@ -27,7 +28,7 @@ def check_pcie_sysfs(watchdog: meta.Watchdog) -> None:
     raise OSError('No PCIe root port found.')
 
 
-def consume_pcie_root(path: str, sysfs_error: SysfsError) -> int:
+def consume_pcie_root(path: str, sysfs_error: SysfsError) -> None:
     count = 0
     for root, dirs, files in os.walk(top=path):
         # We are not going to read all devices' directories due to file-read many errors.
@@ -47,18 +48,15 @@ def consume_pcie_root(path: str, sysfs_error: SysfsError) -> int:
                     else:
                         print(f'- Error: {file_path} - {e}')
                         sysfs_error.save[file_path] = e.errno
-                        raise e
                 finally:
                     f.close()
 
-    return count
+    sys.exit(count)
 
 
 def read_pcie_sysfs(watchdog: meta.Watchdog) -> None:
-    executor = concurrent.futures.ThreadPoolExecutor()
     sysfs = '/sys/devices/'
-    todo = []
-    future_map = {}
+    proc_map = {}
     sysfs_error = SysfsError()
     for entry in os.listdir(sysfs):
         if not re.match(r'pci\d+:\d+', entry):
@@ -66,13 +64,15 @@ def read_pcie_sysfs(watchdog: meta.Watchdog) -> None:
 
         root_path = os.path.join(sysfs, entry)
         print(f'- Read files in {root_path}.')
-        future = executor.submit(consume_pcie_root, root_path, sysfs_error)
-        future_map[future] = root_path
-        todo.append(future)
+        proc = multiprocessing.Process(target=consume_pcie_root, daemon=True,
+                                       kwargs={'path': root_path, 'sysfs_error': sysfs_error})
+        proc.start()
+        proc_map[proc] = root_path
 
-    # Check to see if we get any exceptions.
-    for future in concurrent.futures.as_completed(fs=todo):
-        print(f'- Finish reading {future_map[future]} for {future.result()} files.')
+    # Ideally, we can convert those to non-blocking.
+    for proc in proc_map:
+        proc.join()
+        print(f'- Finish reading {proc_map[proc]} for {proc.exitcode} files.')
 
     for file in sysfs_error.save:
         print(f'- {file}: {os.strerror(sysfs_error.save[file])}')

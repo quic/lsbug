@@ -57,6 +57,7 @@ def test_meta_watchdog():
 
         pid = os.fork()
         if pid == 0:
+            # This is going to get killed.
             time.sleep(15)
             sys.exit(os.EX_OK)
 
