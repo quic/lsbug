@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
 # SPDX-License-Identifier: GPL-2.0-or-later
 
