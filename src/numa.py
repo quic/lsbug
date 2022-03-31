@@ -11,15 +11,6 @@ import src.meta as meta
 import src.utils as utils
 
 
-class Mpol(enum.IntEnum):
-    MPOL_DEFAULT = 0
-    MPOL_PREFERRED = enum.auto()
-    MPOL_BIND = enum.auto()
-    MPOL_INTERLEAVE = enum.auto()
-    MPOL_LOCAL = enum.auto()
-    MPOL_PREFERRED_MANY = enum.auto()
-
-
 class Numa:
     def __init__(self):
         # All system call numbers are from "include/uapi/asm-generic/unistd.h".
@@ -30,8 +21,8 @@ class Numa:
         self.nr_move_pages = 239
         self.sysfs = '/sys/devices/system/node/'
         # from "include/uapi/linux/mempolicy.h"
-        self.policy = ('MPOL_DEFAULT', 'MPOL_PREFERRED', 'MPOL_BIND', 'MPOL_INTERLEAVE', 'MPOL_LOCAL',
-                       'MPOL_PREFERRED_MANY')
+        self.policy = utils.DoubleDict(['MPOL_DEFAULT', 'MPOL_PREFERRED', 'MPOL_BIND', 'MPOL_INTERLEAVE', 'MPOL_LOCAL',
+                                        'MPOL_PREFERRED_MANY'])
         self.syscall = ctypes.CDLL(name=ctypes.util.find_library('c'), use_errno=True).syscall
         self.maxnode = 4096
 
