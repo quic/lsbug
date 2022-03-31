@@ -6,6 +6,7 @@ import signal
 import subprocess
 import sys
 import time
+import tempfile
 
 import src.meta as meta
 import src.utils as utils
@@ -102,3 +103,28 @@ def test_utils_double_dict():
     for index, value in enumerate(test_list):
         assert double_dict[index] == value
         assert double_dict[value] == index
+
+
+def test_utils_parse_pair_file():
+    dataset = {
+        'a': 'A',
+        'b': 'B',
+        'c': 'C',
+        'd': 'D',
+        'e': 'E'
+    }
+    f, file = tempfile.mkstemp(text=True)
+    os.close(f)
+
+    with open(file, 'w') as f:
+        for key in dataset:
+            f.write(f'{key} {dataset[key]}\n')
+
+    assert utils.parse_pair_file(file=file) == dataset
+
+    with open(file, 'w') as f:
+        for key in dataset:
+            f.write(f'{key}:{dataset[key]}\n')
+
+    assert utils.parse_pair_file(file=file, sep=':') == dataset
+    os.remove(file)

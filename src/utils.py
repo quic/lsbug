@@ -3,6 +3,7 @@
 
 import os
 import re
+import typing
 
 import src.data as data
 
@@ -68,6 +69,17 @@ def tail_cpu() -> int:
     return cpu
 
 
+def parse_pair_file(file: str, sep: typing.Optional[str] = None) -> dict[str, str]:
+    """Return key value pairs from a file according to a delimiter string."""
+    pairs = {}
+    with open(file) as f:
+        for line in f:
+            key, value = line.rstrip().split(sep=sep)
+            pairs[key] = value
+
+    return pairs
+
+
 def tail_node() -> int:
     """Return the last online NUMA node number including some memory."""
     sysfs = '/sys/devices/system/node/'
@@ -78,12 +90,10 @@ def tail_node() -> int:
 
         # Don't think we can have a CPU-less node, so just check the "local_node" number.
         path = os.path.join(sysfs, entry, 'numastat')
-        with open(path) as f:
-            for line in f:
-                name, value = line.split()
-                # Make sure we have some memory in this node.
-                if name == 'local_node' and int(value) > 0:
-                    node = max(node, int(entry.lstrip('node')))
+        pairs = parse_pair_file(file=path)
+
+        if int(pairs['local_node']) > 0:
+            node = max(node, int(entry.lstrip('node')))
 
     assert node >= 0
     return node
