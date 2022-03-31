@@ -47,9 +47,7 @@ def test_lsbug_negative():
 def test_meta_watchdog():
     tc_pid = os.fork()
     if tc_pid == 0:
-        tc = meta.TestCase()
-        tc.timeout = 10
-
+        tc = meta.TestCase(timeout=10, run=lambda x: None, name='dummy')
         wd = meta.Watchdog()
         wd.register(tc)
 

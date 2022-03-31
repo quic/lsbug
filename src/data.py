@@ -9,29 +9,25 @@ import src.pcie as pcie
 import src.numa as numa
 
 
+# This class will be alive for the program's whole life, so we don't need to create an instance of it.
 class Mapping:
     _tc_map = {
-        1: (cppc.setup_cppc, cppc.run_cppc, lambda x: None, 30, 'Scale CPU up and down.'),
-        2: (pcie.check_pcie_sysfs, pcie.read_pcie_sysfs, lambda x: None, 30, 'Read all PCIe sysfs files.'),
-        3: (numa.check_numa_node, numa.allocate_numa_node, numa.restore_numa_policy, 30,
-            'Allocate memory in a NUMA node.')
+        1: meta.TestCase(setup=cppc.setup_cppc, run=cppc.run_cppc, timeout=30, name='Scale CPU up and down.'),
+        2: meta.TestCase(setup=pcie.check_pcie_sysfs, run=pcie.read_pcie_sysfs, timeout=30,
+                         name='Read all PCIe sysfs files.'),
+        3: meta.TestCase(setup=numa.check_numa_node, run=numa.allocate_numa_node, cleanup=numa.restore_numa_policy,
+                         timeout=30, name='Allocate memory in a NUMA node.')
     }
 
     @classmethod
     def show_all(cls):
-        for key, value in cls._tc_map.items():
-            print(f'{key:<8}: {value[-1]}')
+        for index, tc in cls._tc_map.items():
+            print(f'{index:<8}: {tc.name}')
 
     @classmethod
     def get_test_case(cls, num: int) -> typing.Optional[meta.TestCase]:
-        test_case = meta.TestCase()
-
         if num in cls._tc_map:
-            test_case.setup, test_case.run, test_case.cleanup, test_case.timeout, test_case.name = cls._tc_map[num]
-        else:
-            return
-
-        return test_case
+            return cls._tc_map[num]
 
     @classmethod
     def get_total(cls) -> int:
