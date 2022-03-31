@@ -3,7 +3,6 @@
 
 import ctypes
 import ctypes.util
-import enum
 import os
 import typing
 
@@ -27,13 +26,20 @@ class Numa:
         self.maxnode = 4096
 
     def get_mempolicy(self, mode: 'ctypes.byref', nodemask: ctypes.Array, maxnode: int, addr: typing.Optional[int],
-                      flags: int):
+                      flags: int) -> None:
         self.syscall.argtypes = [ctypes.c_long, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_ulong),
                                  ctypes.c_ulong, ctypes.c_void_p, ctypes.c_int]
         self.syscall.restype = ctypes.c_long
 
         if self.syscall(self.nr_get_mempolicy, mode, nodemask, maxnode, addr, flags):
             raise OSError(f'error from get_mempolicy():', os.strerror(ctypes.get_errno()))
+
+    def set_mempolicy(self, mode: int, nodemask: ctypes.Array, maxnode: int) -> None:
+        self.syscall.argtypes = [ctypes.c_long, ctypes.c_int, ctypes.POINTER(ctypes.c_ulong), ctypes.c_ulong]
+        self.syscall.restype = ctypes.c_long
+
+        if self.syscall(self.nr_set_mempolicy, mode, nodemask, maxnode):
+            raise OSError(f'error from set_mempolicy():', os.strerror(ctypes.get_errno()))
 
 
 def check_numa_node(watchdog: meta.Watchdog) -> None:
@@ -55,4 +61,9 @@ def allocate_numa_node(watchdog: meta.Watchdog) -> None:
 
 
 def restore_numa_policy(watchdog: meta.Watchdog) -> None:
-    pass
+    numa = Numa()
+    mode = watchdog.storage['mode']
+    nodemask = watchdog.storage['nodemask']
+
+    print(f'- Restore NUMA policy to {numa.policy[mode.value]}.')
+    numa.set_mempolicy(mode=mode, nodemask=nodemask, maxnode=numa.maxnode)
