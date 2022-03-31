@@ -6,12 +6,15 @@ import typing
 import src.meta as meta
 import src.cppc as cppc
 import src.pcie as pcie
+import src.numa as numa
 
 
 class Mapping:
     _tc_map = {
         1: (cppc.setup_cppc, cppc.run_cppc, lambda x: None, 30, 'Scale CPU up and down.'),
-        2: (pcie.check_pcie_sysfs, pcie.read_pcie_sysfs, lambda x: None, 30, 'Read all PCIe sysfs files.')
+        2: (pcie.check_pcie_sysfs, pcie.read_pcie_sysfs, lambda x: None, 30, 'Read all PCIe sysfs files.'),
+        3: (numa.check_numa_node, numa.allocate_numa_node, numa.restore_numa_policy, 30,
+            'Allocate memory in a NUMA node.')
     }
 
     @classmethod

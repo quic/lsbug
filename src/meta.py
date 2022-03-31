@@ -37,6 +37,8 @@ class Watchdog:
         # We will need to kill children first, so we will use a stack.
         self.pids: list[int] = [os.getpid()]
         self.timers: dict[typing.Union[TestRun, TestCase], threading.Timer] = {}
+        # We can use it to pass values within a test case.
+        self.storage = {}
 
     def kill(self) -> None:
         while self.pids:

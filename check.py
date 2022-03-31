@@ -77,6 +77,7 @@ def test_lsbug_list() -> None:
     expect = """\
 1       : Scale CPU up and down.
 2       : Read all PCIe sysfs files.
+3       : Allocate memory in a NUMA node.
 """
     assert output == expect
 
@@ -91,3 +92,7 @@ def test_merge_range() -> None:
     assert utils.merge_ranges(deny=['1-8'], allow=['2-4']) == []
     assert utils.merge_ranges(deny=['2', '4'], allow=['1-6']) == [1, 3, 5, 6]
     assert utils.merge_ranges(deny=['1-4'], allow=['2', '7', '8']) == [7, 8]
+
+
+def test_utils_tail_node():
+    assert utils.tail_node() >= 0
