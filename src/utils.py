@@ -7,6 +7,17 @@ import re
 import src.data as data
 
 
+class DoubleDict:
+    def __init__(self, key_list: list[str]):
+        self.double_dict = {}
+        for index, key in enumerate(key_list):
+            self.double_dict[index] = key
+            self.double_dict[key] = index
+
+    def __getitem__(self, item):
+        return self.double_dict[item]
+
+
 def parse_range(simple_range: str) -> tuple[int, int]:
     try:
         start, end = simple_range.split('-')

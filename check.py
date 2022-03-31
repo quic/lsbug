@@ -96,3 +96,11 @@ def test_merge_range() -> None:
 
 def test_utils_tail_node():
     assert utils.tail_node() >= 0
+
+
+def test_utils_double_dict():
+    test_list = ['a', 'b', 'c', 'd']
+    double_dict = utils.DoubleDict(test_list)
+    for index, value in enumerate(test_list):
+        assert double_dict[index] == value
+        assert double_dict[value] == index
