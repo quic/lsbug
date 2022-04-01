@@ -20,7 +20,7 @@ class Mapping:
     }
 
     @classmethod
-    def show_all(cls):
+    def show_all(cls) -> None:
         for index, tc in cls._tc_map.items():
             print(f'{index:<8}: {tc.name}')
 

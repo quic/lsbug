@@ -9,7 +9,7 @@ from src import meta, data, utils
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog='lsbug')
+    parser = argparse.ArgumentParser(prog='lsbug.py')
     parser.add_argument('-l', '--list', action='store_true', help='List all test cases and their descriptions.')
     parser.add_argument('-d', '--debug', action='store_true', help='Turn on the debugging output.')
     parser.add_argument('-x', '--exclude', action='append',

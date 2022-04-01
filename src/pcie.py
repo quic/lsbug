@@ -12,10 +12,18 @@ import src.meta as meta
 
 class SysfsError:
     def __init__(self):
-        self.save = {}
-        self.allow = {
+        self._save: dict[str, int] = {}
+        self._allow: dict[str, int] = {
             'autosuspend_delay_ms': errno.EIO
         }
+
+    @property
+    def save(self) -> dict[str, int]:
+        return self._save
+
+    @property
+    def allow(self) -> dict[str, int]:
+        return self._allow
 
 
 def check_pcie_sysfs(watchdog: meta.Watchdog) -> None:
@@ -32,20 +40,20 @@ def consume_pcie_root(path: str, sysfs_error: SysfsError) -> None:
         # We are not going to read all devices' directories due to file-read many errors.
         dirs[:] = [entry for entry in dirs if not re.match(r'[0-9a-z]+:[0-9a-z]+:[0-9a-z]+\.[0-9a-z]+', entry)]
 
-        for file in files:
-            file_path = os.path.join(root, file)
-            if os.access(file_path, os.R_OK):
+        for entry in files:
+            file = os.path.join(root, entry)
+            if os.access(file, os.R_OK):
                 # we might get decoding errors without 'b'.
-                f = open(file_path, 'rb')
+                f = open(file, 'rb')
                 try:
                     count += 1
                     f.read()
                 except OSError as e:
-                    if file in sysfs_error.allow and sysfs_error.allow[file] == e.errno:
+                    if entry in sysfs_error.allow and sysfs_error.allow[entry] == e.errno:
                         pass
                     else:
-                        print(f'- Error: {file_path} - {e}')
-                        sysfs_error.save[file_path] = e.errno
+                        print(f'- Error: {file} - {e}', file=sys.stderr)
+                        sysfs_error.save[entry] = e.errno
                 finally:
                     f.close()
 

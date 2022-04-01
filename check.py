@@ -13,14 +13,19 @@ import src.utils as utils
 
 
 class Lsbug:
-    path = f'{sys.path[0]}/lsbug.py'
+    def __init__(self) -> None:
+        self._path = os.path.join(sys.path[0], 'lsbug.py')
+
+    @property
+    def path(self) -> str:
+        return self._path
 
 
 def test_lsbug_help() -> None:
     # We want to run the tests from any directory, so use the absolute path.
-    output = subprocess.check_output([Lsbug.path, '-h']).decode('utf-8')
+    output = subprocess.check_output([Lsbug().path, '-h']).decode('utf-8')
     expect = """\
-usage: lsbug [-h] [-l] [-d] [-x EXCLUDE] [-t TIMEOUT] test_cases
+usage: lsbug.py [-h] [-l] [-d] [-x EXCLUDE] [-t TIMEOUT] test_cases
 
 positional arguments:
   test_cases            Trigger test cases by numbers. They can be specified
@@ -40,7 +45,7 @@ optional arguments:
 
 
 def test_lsbug_negative():
-    output = subprocess.check_output([Lsbug.path, '-1']).decode('utf-8')
+    output = subprocess.check_output([Lsbug().path, '-1']).decode('utf-8')
     print(output, end='')
     assert output == ''
 
@@ -72,7 +77,7 @@ def test_utils_tail_cpu():
 
 
 def test_lsbug_list() -> None:
-    output = subprocess.check_output([Lsbug.path, '-l']).decode('utf-8')
+    output = subprocess.check_output([Lsbug().path, '-l']).decode('utf-8')
     expect = """\
 1       : Scale CPU up and down.
 2       : Read all PCIe sysfs files.

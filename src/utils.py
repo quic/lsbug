@@ -9,14 +9,14 @@ import src.data as data
 
 
 class DoubleDict:
-    def __init__(self, key_list: list[str]):
-        self.double_dict = {}
+    def __init__(self, key_list: list[str]) -> None:
+        self._double_dict: dict[typing.Union[str, int], typing.Union[str, int]] = {}
         for index, key in enumerate(key_list):
-            self.double_dict[index] = key
-            self.double_dict[key] = index
+            self._double_dict[index] = key
+            self._double_dict[key] = index
 
-    def __getitem__(self, item):
-        return self.double_dict[item]
+    def __getitem__(self, item: typing.Union[str, int]) -> typing.Union[str, int]:
+        return self._double_dict[item]
 
 
 def parse_range(simple_range: str) -> tuple[int, int]:
@@ -55,18 +55,18 @@ def merge_ranges(deny: list[str], allow: list[str]) -> list[int]:
 def tail_cpu() -> int:
     """Return the last online CPU number."""
     sysfs = '/sys/devices/system/cpu/'
-    cpu = -1
+    nr_cpu = -1
     for entry in os.listdir(sysfs):
         if not re.match(r'cpu\d+', entry):
             continue
 
         # Whether CPU0 have the "online" file depends on the kernel config.
-        online = f'{sysfs}{entry}/online'
-        if os.path.exists(online) and open(online).read().rstrip() == '1':
-            cpu = max(cpu, int(entry.lstrip('cpu')))
+        online_file = os.path.join(sysfs, entry, 'online')
+        if os.path.exists(online_file) and open(online_file).read().rstrip() == '1':
+            nr_cpu = max(nr_cpu, int(entry.lstrip('cpu')))
 
-    assert cpu >= 0
-    return cpu
+    assert nr_cpu >= 0
+    return nr_cpu
 
 
 def parse_pair_file(file: str, sep: typing.Optional[str] = None) -> dict[str, str]:
@@ -83,17 +83,17 @@ def parse_pair_file(file: str, sep: typing.Optional[str] = None) -> dict[str, st
 def tail_node() -> int:
     """Return the last online NUMA node number including some memory."""
     sysfs = '/sys/devices/system/node/'
-    node = -1
+    nr_node = -1
     for entry in os.listdir(sysfs):
         if not re.match(r'node\d+', entry):
             continue
 
         # Don't think we can have a CPU-less node, so just check the "local_node" number.
-        path = os.path.join(sysfs, entry, 'numastat')
-        pairs = parse_pair_file(file=path)
+        numastat = os.path.join(sysfs, entry, 'numastat')
+        pairs = parse_pair_file(file=numastat)
 
         if int(pairs['local_node']) > 0:
-            node = max(node, int(entry.lstrip('node')))
+            nr_node = max(nr_node, int(entry.lstrip('node')))
 
-    assert node >= 0
-    return node
+    assert nr_node >= 0
+    return nr_node
