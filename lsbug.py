@@ -14,7 +14,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('-d', '--debug', action='store_true', help='Turn on the debugging output.')
     parser.add_argument('-x', '--exclude', action='append',
                         help='Exclude test cases by a number or range. It can be specified multiple times.')
-    parser.add_argument('-t', '--timeout', help='number of seconds before killing the test run.')
+    parser.add_argument('-t', '--timeout', type=float, help='number of seconds before killing the test run.')
     parser.add_argument('test_cases', nargs='*', default=0,
                         help=('Trigger test cases by numbers. They can be specified multiple times and used as a range,'
                               ' e.g., 0-3'))
@@ -29,9 +29,10 @@ def main() -> None:
         return
 
     watchdog = meta.Watchdog()
-    test_run = meta.TestRun()
-    if args.timeout:
-        watchdog.register(test_run)
+    timeout = args.timeout or 0
+    assert timeout >= 0
+    test_run = meta.TestRun(timeout=timeout)
+    watchdog.register(test_run)
 
     tc_allow = list(args.test_cases or [])
     tc_deny = list(args.exclude or [])
@@ -43,16 +44,14 @@ def main() -> None:
             continue
 
         print(f'- Start test case: {test_case.name}')
-        tc_watchdog = meta.Watchdog()
-        tc_watchdog.register(test_case)
-        test_case.setup(tc_watchdog)
-        test_case.run(tc_watchdog)
-        test_case.cleanup(tc_watchdog)
-        tc_watchdog.unregister(test_case)
+        watchdog.register(test_case)
+        test_case.setup(watchdog)
+        test_case.run(watchdog)
+        test_case.cleanup(watchdog)
+        watchdog.unregister(test_case)
         print(f'- Finish test case: {test_case.name}')
 
-    if args.timeout:
-        watchdog.unregister(test_run)
+    watchdog.unregister(test_run)
 
 
 if __name__ == '__main__':

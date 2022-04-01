@@ -65,11 +65,17 @@ def test_meta_watchdog():
 
         wd.add_pid(pid)
         os.waitpid(pid, 0)
+        wd.del_pid(pid)
         wd.unregister(tc)
         sys.exit(os.EX_OK)
 
     _, status = os.waitpid(tc_pid, 0)
     assert os.WIFSIGNALED(status) and os.WTERMSIG(status) == signal.SIGTERM
+
+
+def test_lsbug_timeout():
+    proc = subprocess.run([Lsbug().path, '-t', '0.01'])
+    assert proc.returncode == -signal.SIGTERM
 
 
 def test_utils_tail_cpu():

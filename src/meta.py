@@ -21,7 +21,7 @@ class TestCase:
 
 @dataclasses.dataclass(frozen=True)
 class TestRun:
-    timeout: int = 0
+    timeout: int
 
 
 class Watchdog:
@@ -41,15 +41,21 @@ class Watchdog:
             os.kill(self._pids.pop(), signal.SIGTERM)
 
     def register(self, target: typing.Union[TestRun, TestCase]) -> None:
+        if target.timeout == 0:
+            return
+
         assert target not in self._timers
 
-        timer = threading.Timer(target.timeout, self.kill)
+        timer = threading.Timer(interval=target.timeout, function=self.kill)
         # We want the timer to end if the main thread is terminated.
         timer.daemon = True
         timer.start()
         self._timers[target] = timer
 
     def unregister(self, target: typing.Union[TestRun, TestCase]) -> None:
+        if target.timeout == 0:
+            return
+
         assert target in self._timers
 
         # This won't report any errors.
