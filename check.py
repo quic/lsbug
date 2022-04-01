@@ -123,6 +123,7 @@ def test_utils_parse_pair_file():
 
     with open(file, 'w') as f:
         for key in dataset:
+            f.write('abc\n')
             f.write(f'{key} {dataset[key]}\n')
 
     assert utils.parse_pair_file(file=file) == dataset

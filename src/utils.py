@@ -70,12 +70,15 @@ def tail_cpu() -> int:
 
 
 def parse_pair_file(file: str, sep: typing.Optional[str] = None) -> dict[str, str]:
-    """Return key value pairs from a file according to a delimiter string."""
+    """Return key value pairs from a file according to a delimiter string, and ignore non-working lines."""
     pairs = {}
     with open(file) as f:
         for line in f:
-            key, value = line.rstrip().split(sep=sep)
-            pairs[key] = value
+            try:
+                key, value = line.rstrip().split(sep=sep)
+                pairs[key] = value
+            except ValueError:
+                pass
 
     return pairs
 
