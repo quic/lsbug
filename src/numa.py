@@ -5,6 +5,8 @@ import ctypes
 import ctypes.util
 import os
 import typing
+import mmap
+import resource
 
 import src.meta as meta
 import src.utils as utils
@@ -57,7 +59,27 @@ def check_numa_node(watchdog: meta.Watchdog) -> None:
 
 
 def allocate_numa_node(watchdog: meta.Watchdog) -> None:
-    pass
+    numa = Numa()
+    nodemask = (ctypes.c_ulong * numa.maxnode)()
+    node = watchdog.storage['node']
+    nodemask[0] = ctypes.c_ulong(1 << node)
+    numa.set_mempolicy(numa.policy['MPOL_BIND'], nodemask, numa.maxnode)
+
+    numastat = os.path.join(numa.sysfs, f'node{node}', 'numastat')
+    old_numa_hit = utils.parse_pair_file(file=numastat)['numa_hit']
+
+    num_pages = 1024
+    print(f'- Allocate {num_pages} on NUMA node {node}.')
+    for _ in range(num_pages):
+        with mmap.mmap(-1, resource.getpagesize()) as mm:
+            mm.write(b'0')
+
+    new_numa_hit = utils.parse_pair_file(file=numastat)['numa_hit']
+    delta = int(new_numa_hit) - int(old_numa_hit)
+    print(f'- The delta from "numa_hit" is {delta}.')
+    # We probably won't get the exact delta due to debugging features like KASAN.
+    if delta < num_pages:
+        raise OSError(f'- unexpected "numa_hit": old {old_numa_hit}; new {new_numa_hit}')
 
 
 def restore_numa_policy(watchdog: meta.Watchdog) -> None:

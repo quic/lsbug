@@ -44,7 +44,7 @@ def setup_cppc(watchdog: meta.Watchdog) -> None:
     governor = open(f'{cppc.soft_path}scaling_governor').read().rstrip()
     if governor != 'schedutil':
         print(f'- Error: cpufreq governor is {governor}', file=sys.stderr)
-        raise OSError('The cpufreq governor is not "schedutil"')
+        raise OSError('The cpufreq governor is not "schedutil".')
 
     dump_cppc(cppc)
 
