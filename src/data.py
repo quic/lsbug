@@ -3,10 +3,10 @@
 
 import typing
 
-import src.meta as meta
-import src.cppc as cppc
-import src.pcie as pcie
-import src.numa as numa
+from src import cppc
+from src import meta
+from src import numa
+from src import pcie
 
 
 # This class will be alive for the program's whole life, so we don't need to create an instance of it.

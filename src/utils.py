@@ -5,7 +5,7 @@ import os
 import re
 import typing
 
-import src.data as data
+from src import data
 
 
 class DoubleDict:

@@ -1,14 +1,14 @@
 # Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
 # SPDX-License-Identifier: GPL-2.0-or-later
 
+import math
 import os
-import time
 import signal
 import sys
-import math
+import time
 
-import src.meta as meta
-import src.utils as utils
+from src import meta
+from src import utils
 
 
 class Cppc:

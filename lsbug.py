@@ -5,7 +5,9 @@
 
 import argparse
 
-from src import meta, data, utils
+from src import data
+from src import meta
+from src import utils
 
 
 def parse_args() -> argparse.Namespace:

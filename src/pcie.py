@@ -1,13 +1,13 @@
 # Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
 # SPDX-License-Identifier: GPL-2.0-or-later
 
-import re
-import os
 import errno
 import multiprocessing
+import os
+import re
 import sys
 
-import src.meta as meta
+from src import meta
 
 
 class SysfsError:

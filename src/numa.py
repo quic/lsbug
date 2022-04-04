@@ -6,13 +6,13 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.util
-import os
-import typing
 import mmap
+import os
 import resource
+import typing
 
-import src.meta as meta
-import src.utils as utils
+from src import meta
+from src import utils
 
 
 class Numa:

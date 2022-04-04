@@ -5,11 +5,11 @@ import os
 import signal
 import subprocess
 import sys
-import time
 import tempfile
+import time
 
-import src.meta as meta
-import src.utils as utils
+from src import meta
+from src import utils
 
 
 class Lsbug:

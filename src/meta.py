@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 
+import dataclasses
 import os
 import signal
-import typing
 import threading
-import dataclasses
+import typing
 
 
 @dataclasses.dataclass(frozen=True)
