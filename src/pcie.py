@@ -12,14 +12,9 @@ import src.meta as meta
 
 class SysfsError:
     def __init__(self):
-        self._save: dict[str, int] = {}
         self._allow: dict[str, int] = {
             'autosuspend_delay_ms': errno.EIO
         }
-
-    @property
-    def save(self) -> dict[str, int]:
-        return self._save
 
     @property
     def allow(self) -> dict[str, int]:
@@ -34,7 +29,7 @@ def check_pcie_sysfs(watchdog: meta.Watchdog) -> None:
     raise OSError('No PCIe root port found.')
 
 
-def consume_pcie_root(path: str, sysfs_error: SysfsError) -> None:
+def consume_pcie_root(path: str, sysfs_error: SysfsError, save_errors: dict[str, int]) -> None:
     count = 0
     for root, dirs, files in os.walk(top=path):
         # We are not going to read all devices' directories due to file-read many errors.
@@ -53,7 +48,7 @@ def consume_pcie_root(path: str, sysfs_error: SysfsError) -> None:
                         pass
                     else:
                         print(f'- Error: {file} - {e}', file=sys.stderr)
-                        sysfs_error.save[entry] = e.errno
+                        save_errors[entry] = e.errno
                 finally:
                     f.close()
 
@@ -64,6 +59,7 @@ def read_pcie_sysfs(watchdog: meta.Watchdog) -> None:
     sysfs = '/sys/devices/'
     proc_map = {}
     sysfs_error = SysfsError()
+    save_errors = multiprocessing.Manager().dict()
     for entry in os.listdir(sysfs):
         if not re.match(r'pci\d+:\d+', entry):
             continue
@@ -71,7 +67,8 @@ def read_pcie_sysfs(watchdog: meta.Watchdog) -> None:
         root_path = os.path.join(sysfs, entry)
         print(f'- Read files in {root_path}.')
         proc = multiprocessing.Process(target=consume_pcie_root, daemon=True,
-                                       kwargs={'path': root_path, 'sysfs_error': sysfs_error})
+                                       kwargs={'path': root_path, 'sysfs_error': sysfs_error,
+                                               'save_errors': save_errors})
         proc.start()
         proc_map[proc] = root_path
 
@@ -80,8 +77,8 @@ def read_pcie_sysfs(watchdog: meta.Watchdog) -> None:
         proc.join()
         print(f'- Finish reading {proc_map[proc]} for {proc.exitcode} files.')
 
-    for file in sysfs_error.save:
-        print(f'- {file}: {os.strerror(sysfs_error.save[file])}')
+    for file in save_errors:
+        print(f'- {file}: {os.strerror(save_errors[file])}')
 
-    if sysfs_error.save:
+    if save_errors:
         raise OSError(f'Caught the above exceptions.')
